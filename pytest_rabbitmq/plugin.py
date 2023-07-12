@@ -31,6 +31,7 @@ _help_host = "Host at which RabbitMQ will accept connections"
 _help_port = "Port at which RabbitMQ will accept connections"
 _help_distribution_port = "Port at which RabbitMQ nodes will communicate with each other"
 _help_node = "Node name for rabbitmq instance"
+_help_timeout = "Timout for rabbitmq-server startup"
 
 
 def pytest_addoption(parser: Parser) -> None:
@@ -71,6 +72,11 @@ def pytest_addoption(parser: Parser) -> None:
         help=_help_node,
         default=None,
     )
+    parser.addini(
+        name="rabbitmq_timeout",
+        help=_help_timeout,
+        default=None,
+    )
 
     parser.addoption(
         "--rabbitmq-host",
@@ -106,6 +112,12 @@ def pytest_addoption(parser: Parser) -> None:
         action="store",
         dest="rabbitmq_node",
         help=_help_node,
+    )
+    parser.addoption(
+        "--rabbitmq-timeout",
+        action="store",
+        dest="rabbitmq_timeout",
+        help=_help_timeout,
     )
 
 

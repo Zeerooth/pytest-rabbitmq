@@ -23,6 +23,7 @@ class RabbitMqExecutor(TCPExecutor):
         path: Path,
         plugin_path: Path,
         node_name: Optional[str] = None,
+        timeout: int = 60,
     ) -> None:  # pylint:disable=too-many-arguments
         """Initialize RabbitMQ executor.
 
@@ -44,7 +45,7 @@ class RabbitMqExecutor(TCPExecutor):
             # at different ports will work separately instead of clustering.
             "RABBITMQ_NODENAME": node_name or f"rabbitmq-test-{port}",
         }
-        super().__init__(command, host, port, timeout=60, envvars=envvars)
+        super().__init__(command, host, port, timeout=timeout, envvars=envvars)
         self.rabbit_ctl = rabbit_ctl
 
     def rabbitctl_output(self, *args: str) -> str:

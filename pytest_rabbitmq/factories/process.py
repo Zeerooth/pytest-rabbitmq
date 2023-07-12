@@ -64,6 +64,7 @@ class RabbitMQConfig(TypedDict):
     ctl: str
     node: str
     plugindir: Path
+    timeout: Optional[int]
 
 
 def get_config(request: FixtureRequest) -> RabbitMQConfig:
@@ -76,6 +77,7 @@ def get_config(request: FixtureRequest) -> RabbitMQConfig:
     port = get_conf_option("port")
     distribution_port = get_conf_option("distribution_port")
     logsdir = get_conf_option("logsdir")
+    timeout = get_conf_option("timeout")
     config: RabbitMQConfig = {
         "host": get_conf_option("host"),
         "port": int(port) if port else None,
@@ -85,6 +87,7 @@ def get_config(request: FixtureRequest) -> RabbitMQConfig:
         "ctl": get_conf_option("ctl"),
         "node": get_conf_option("node"),
         "plugindir": Path(get_conf_option("plugindir")),
+        "timeout": int(timeout) if timeout else None,
     }
     return config
 
@@ -98,6 +101,7 @@ def rabbitmq_proc(
     ctl: Optional[str] = None,
     logsdir: Optional[Path] = None,
     plugindir: Optional[Path] = None,
+    timeout: Optional[int] = None
 ) -> Callable[[FixtureRequest, TempPathFactory], Generator[RabbitMqExecutor, None, None]]:
     """Fixture factory for RabbitMQ process.
 
@@ -140,6 +144,7 @@ def rabbitmq_proc(
         #.  * RABBITMQ_NODE_PORT
         #.  * RABBITMQ_DIST_PORT
         #.  * RABBITMQ_NODENAME
+        #.  * RABBITMQ_TIMEOUT
         #. Start a rabbit server
             `<http://www.rabbitmq.com/man/rabbitmq-server.1.man.html>`_
         #. Stop rabbit server and remove temporary files after tests.
@@ -161,6 +166,7 @@ def rabbitmq_proc(
         assert (
             rabbit_distribution_port != rabbit_port
         ), "rabbit_port and distribution_port can not be the same!"
+        rabbit_timeout = timeout or config["timeout"]
 
         tmpdir = tmp_path_factory.mktemp(f"pytest-rabbitmq-{request.fixturename}")
 
@@ -187,6 +193,7 @@ def rabbitmq_proc(
             path=tmpdir,
             plugin_path=rabbit_plugin_path,
             node_name=node or config["node"],
+            timeout=rabbit_timeout
         )
 
         rabbit_executor.start()
